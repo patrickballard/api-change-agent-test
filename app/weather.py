@@ -22,9 +22,9 @@ def ask_weather(client: openai.OpenAI, question: str) -> dict:
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": question}],
-        functions=[WEATHER_FN],  # legacy function calling
-        function_call={"name": "get_weather"},
+        tools=[{"type": "function", "function": WEATHER_FN}],  # legacy function calling
+        tool_choice={"type": "function", "function": {"name": "get_weather"}},
     )
     message = response.choices[0].message
-    args = json.loads(message.function_call.arguments)
+    args = json.loads(message.tool_calls[0].function.arguments)
     return lookup(**args)
