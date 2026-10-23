@@ -1,20 +1,21 @@
 """Daily ETL, written for Airflow 2."""
 import datetime
 
-from airflow import DAG
-from airflow.operators.bash_operator import BashOperator
-from airflow.operators.python_operator import PythonOperator
+from airflow.sdk import DAG
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.sdk import CronDataIntervalTimetable
 
 
 def extract(**context):
-    run_date = context["execution_date"]  # the run's logical date
+    run_date = context["logical_date"]  # the run's logical date
     print(f"extracting for {run_date:%Y-%m-%d}")
     return run_date.strftime("%Y-%m-%d")
 
 
 def load(**kwargs):
-    day = kwargs.get("execution_date")
-    print("loading", day, "after", kwargs["yesterday_ds"])
+    day = kwargs.get("logical_date")
+    print("loading", day, "after", kwargs["macros"].ds_add(kwargs["ds"], -1))
 
 
 def summarize(templates_dict, **_):
@@ -23,7 +24,7 @@ def summarize(templates_dict, **_):
 
 with DAG(
     dag_id="etl_daily",
-    schedule_interval="@daily",
+    schedule=CronDataIntervalTimetable("@daily", timezone="UTC"),
     start_date=datetime.datetime(2024, 1, 1),
     catchup=False,
 ) as dag:
@@ -31,7 +32,7 @@ with DAG(
     load_task = PythonOperator(task_id="load", python_callable=load)
     report = BashOperator(
         task_id="report",
-        bash_command="echo report for {{ execution_date }} after {{ yesterday_ds }}",
+        bash_command="echo report for {{ logical_date }} after {{ macros.ds_add(ds, -1) }}",
     )
     script = BashOperator(task_id="script", bash_command="scripts/report.sh")
     summary = PythonOperator(
