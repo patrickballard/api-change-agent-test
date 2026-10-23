@@ -1,0 +1,17 @@
+name: airflow-3-migration
+on: workflow_dispatch   # run on the `airflow` branch: gh workflow run airflow-3.yml --ref airflow
+
+permissions:
+  contents: write        # push the bot branch (never the default branch)
+  pull-requests: write   # open / update the PR
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: patrickballard/api-change-agent@v1
+        with:
+          rules: airflow
+          dry-run: "true"        # report in the step summary only
+          max-llm-usd: "0.10"    # no anthropic-api-key: deterministic rules only
