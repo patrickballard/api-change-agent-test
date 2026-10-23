@@ -1,5 +1,10 @@
 name: airflow-3-migration
-on: workflow_dispatch   # run on the `airflow` branch: gh workflow run airflow-3.yml --ref airflow
+on:
+  workflow_dispatch:   # run on the `airflow` branch: gh workflow run airflow-3.yml --ref airflow
+    inputs:
+      dry_run:
+        description: "Report only (no PR)"
+        default: "true"
 
 permissions:
   contents: write        # push the bot branch (never the default branch)
@@ -10,8 +15,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # The action builds an Airflow 3 test venv and an Airflow 2 render venv under /github/home
+      # ($RUNNER_TEMP/_github_home here); keep them between runs.
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/_github_home/aca-venv*
+          key: aca-venvs-v1-airflow-3.3.2-${{ hashFiles('**/requirements*.txt', '**/pyproject.toml') }}
       - uses: patrickballard/api-change-agent@v1
         with:
           rules: airflow
-          dry-run: "true"        # report in the step summary only
-          max-llm-usd: "0.10"    # no anthropic-api-key: deterministic rules only
+          dry-run: ${{ inputs.dry_run }}
+          base-branch: ${{ github.ref_name }}   # this fixture lives on its own branch
+          max-llm-usd: "0.10"                   # no anthropic-api-key: deterministic rules only
