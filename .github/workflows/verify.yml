@@ -1,0 +1,24 @@
+name: verify-migration
+on: workflow_dispatch   # verify PR #2 (head api-change-agent/airflow) against its base (airflow)
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: airflow, path: before}
+      - uses: actions/checkout@v4
+        with: {ref: api-change-agent/airflow, path: after}
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/_github_home/aca-venv*
+          key: aca-verify-v1-${{ hashFiles('before/**/requirements*.txt', 'after/**/requirements*.txt') }}
+      - uses: patrickballard/airflow-migration-verifier@main
+        with:
+          mode: verify
+          before: before
+          after: after
