@@ -21,7 +21,7 @@ jobs:
         with:
           path: ${{ runner.temp }}/_github_home/aca-venv*
           key: aca-venvs-v1-airflow-3.3.2-${{ hashFiles('**/requirements*.txt', '**/pyproject.toml') }}
-      - uses: patrickballard/api-change-agent@v1
+      - uses: patrickballard/airflow-migration-verifier@v1
         with:
           rules: airflow
           dry-run: ${{ inputs.dry_run }}
