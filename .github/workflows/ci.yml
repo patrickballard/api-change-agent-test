@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  TOOL_REPO: patrickballard/api-change-agent
+  TOOL_REPO: patrickballard/airflow-migration-verifier
 
 permissions:
   contents: read
