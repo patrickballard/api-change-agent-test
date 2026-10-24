@@ -13,7 +13,7 @@ class Weather(BaseModel):
 
 def extract(client: OpenAI, text: str) -> Weather:
     # keep this comment
-    completion = client.beta.chat.completions.parse(  # inline comment survives
+    completion = client.chat.completions.parse(  # inline comment survives
         model="gpt-4o-2024-08-06",
         messages=[{"role": "user", "content": text}],
         response_format=Weather,
@@ -22,7 +22,7 @@ def extract(client: OpenAI, text: str) -> Weather:
 
 
 def extract_stream(client: OpenAI, text: str) -> Weather:
-    with client.beta.chat.completions.stream(
+    with client.chat.completions.stream(
         model="gpt-4o-2024-08-06",
         messages=[{"role": "user", "content": text}],
         response_format=Weather,
@@ -33,7 +33,7 @@ def extract_stream(client: OpenAI, text: str) -> Weather:
 
 async def extract_async(client: AsyncOpenAI, text: str) -> Weather:
     completion = await (
-        client.beta
+        client
         .chat
         .completions
         .parse(model="gpt-4o-2024-08-06", messages=[{"role": "user", "content": text}], response_format=Weather)
