@@ -17,7 +17,7 @@ jobs:
         with:
           path: ${{ runner.temp }}/_github_home/aca-venv*
           key: aca-verify-v1-${{ hashFiles('before/**/requirements*.txt', 'after/**/requirements*.txt') }}
-      - uses: patrickballard/airflow-migration-verifier@main
+      - uses: patrickballard/airflow-migration-verifier@v1
         with:
           mode: verify
           before: before
